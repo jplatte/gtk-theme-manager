@@ -7,8 +7,6 @@ import qualified Data.Text as T
 
 import           GI.Gtk hiding (main)
 import qualified GI.Gtk as Gtk
-import           GI.GtkAttributes ()
-import           GI.GtkSignals ()
 import           GI.Utils.Base (castTo)
 
 import           System.Environment (getArgs, getProgName)
