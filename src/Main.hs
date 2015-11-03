@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 import           Control.Monad ((>=>))
 
 import           Data.Maybe
@@ -7,9 +5,11 @@ import qualified Data.Text as T
 
 import           GI.Gtk hiding (main)
 import qualified GI.Gtk as Gtk
-import           GI.Utils.Base (castTo)
+import           Data.GI.Base (castTo)
 
 import           System.Environment (getArgs, getProgName)
+
+--import qualified GnomeLookOrg as GLO
 
 main :: IO ()
 main = do
@@ -25,17 +25,17 @@ main = do
     widgetShowAll window
     Gtk.main
 
-initWindow :: Builder -> IO Window
+initWindow :: Builder -> IO ApplicationWindow
 initWindow builder = do
     let getObject ctor = builderGetObject builder >=> castTo ctor >=> return . fromJust
 
-    window <- getObject Window "mainWin"
+    window <- getObject ApplicationWindow "mainWin"
     onWidgetDestroy window mainQuit
 
-    mainStack    <- getObject Stack  "mainStack"
-    startPage    <- getObject Widget "startPage" -- TODO: 'Widget' should be 'Box'
-    themeList    <- getObject Widget "themeList" -- TODO: 'Widget' should be 'ListBox'
-    --themeDetails <- getObject Widget "themeDetails" -- TODO: 'Widget' should be 'Box'
+    mainStack    <- getObject Stack   "mainStack"
+    startPage    <- getObject Box     "startPage"
+    themeList    <- getObject ListBox "themeList"
+    --themeDetails <- getObject Box     "themeDetails"
 
     -- initialize startpage
     spLocalButton  <- getObject Button "spLocalButton"
@@ -56,10 +56,11 @@ initWindow builder = do
     onButtonClicked backButton $ do
         enableBackButton False
 
-        curVisibleChild <- stackGetVisibleChildName mainStack
-        stackSetVisibleChild mainStack $ case curVisibleChild of
-            "themeList"    -> startPage
-            "themeDetails" -> themeList
+        -- eta reduce not possible because of https://wiki.haskell.org/Monomorphism_restriction
+        let goToPage page = stackSetVisibleChild mainStack page
+        stackGetVisibleChildName mainStack >>= \case
+            "themeList"    -> goToPage startPage
+            "themeDetails" -> goToPage themeList
             _              -> error
                 "The back button should not be sensitive on other pages than themeList and themeDetails!"
 
