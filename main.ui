@@ -219,7 +219,6 @@ from gnome-look.org</property>
                   <object class="GtkButton" id="tdInstallButton">
                     <property name="label" translatable="yes">Install</property>
                     <property name="use_action_appearance">True</property>
-                    <property name="related_action"/>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
