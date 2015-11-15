@@ -3,11 +3,8 @@ module GnomeLookOrg.Base
 , apiBaseUrl
 ) where
 
-import           Data.Monoid ((<>))
-import           Data.Text (Text)
-
-apiDomain :: Text
+apiDomain :: String
 apiDomain = "api.gnome-look.org"
 
-apiBaseUrl :: Text
-apiBaseUrl = "https://" <> apiDomain <> "/v1"
+apiBaseUrl :: String
+apiBaseUrl = "https://" ++ apiDomain ++ "/v1"

@@ -4,13 +4,12 @@ module GnomeLookOrg.Categories
 , gtk3
 ) where
 
-import           Data.Monoid ((<>))
-import           Data.Text (Text)
+import qualified Data.Text as T
 
 import           GnomeLookOrg.Base
 
 data Category = Category { categoryId :: Int
-                         , categoryName :: Text
+                         , categoryName :: T.Text
                          } deriving Show
 
 gtk2 :: IO Category
@@ -19,8 +18,8 @@ gtk2 = return fallbackGtk2 -- TODO
 gtk3 :: IO Category
 gtk3 = return fallbackGtk3 -- TODO
 
-categoriesUrl :: Text
-categoriesUrl = apiBaseUrl <> "/content/categories"
+categoriesUrl :: String
+categoriesUrl = apiBaseUrl ++ "/content/categories"
 
 -- The gtk theme categories at the time of writing
 fallbackGtk2 :: Category

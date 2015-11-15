@@ -1,11 +1,15 @@
-import           Control.Monad ((>=>))
+import           Control.Monad.IO.Class (liftIO)
 
-import           Data.Maybe
 import qualified Data.Text as T
 
-import           GI.Gtk hiding (main)
-import qualified GI.Gtk as Gtk
-import           Data.GI.Base (castTo)
+import           Data.GI.Gtk hiding (main)
+import qualified Data.GI.Gtk as Gtk
+import           Data.GI.Base.Attributes
+import           Data.GI.Base.Signals
+import           GI.Properties
+import           GI.Signals
+import           GI.GtkAttributes ()
+import           GI.GtkSignals ()
 
 import           System.Environment (getArgs, getProgName)
 
@@ -20,17 +24,15 @@ main = do
     Gtk.init (Just $ progName:args)
 
     builder <- builderNewFromFile "main.ui"
-    window  <- initWindow builder
+    window  <- buildWithBuilder buildWindow builder
 
     widgetShowAll window
     Gtk.main
 
-initWindow :: Builder -> IO ApplicationWindow
-initWindow builder = do
-    let getObject ctor = builderGetObject builder >=> castTo ctor >=> return . fromJust
-
+buildWindow :: BuildFn ApplicationWindow
+buildWindow = do
     window <- getObject ApplicationWindow "mainWin"
-    onWidgetDestroy window mainQuit
+    liftIO $ on window Destroy mainQuit
 
     mainStack    <- getObject Stack   "mainStack"
     startPage    <- getObject Box     "startPage"
@@ -43,24 +45,20 @@ initWindow builder = do
 
     backButton     <- getObject Button "backButton"
 
-    let enableBackButton = widgetSetSensitive backButton
+    liftIO $ on spLocalButton Clicked $ do
+        set backButton [_sensitive := True]
+        set mainStack  [_visibleChild := themeList]
 
-    onButtonClicked spLocalButton $ do
-        enableBackButton True
-        stackSetVisibleChild mainStack themeList
+    liftIO $ on spOnlineButton Clicked $ do
+        set backButton [_sensitive := True]
+        set mainStack  [_visibleChild := themeList]
 
-    onButtonClicked spOnlineButton $ do
-        enableBackButton True
-        stackSetVisibleChild mainStack themeList
+    liftIO $ on backButton Clicked $ do
+        set backButton [_sensitive := False]
 
-    onButtonClicked backButton $ do
-        enableBackButton False
-
-        -- eta reduce not possible because of https://wiki.haskell.org/Monomorphism_restriction
-        let goToPage page = stackSetVisibleChild mainStack page
-        stackGetVisibleChildName mainStack >>= \case
-            "themeList"    -> goToPage startPage
-            "themeDetails" -> goToPage themeList
+        get mainStack _visibleChildName >>= \case
+            "themeList"    -> set mainStack [_visibleChild := startPage]
+            "themeDetails" -> set mainStack [_visibleChild := themeList]
             _              -> error
                 "The back button should not be sensitive on other pages than themeList and themeDetails!"
 
