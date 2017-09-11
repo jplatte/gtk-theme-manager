@@ -1,0 +1,2 @@
+http://api.gnome-look.org/v1/content/data?categories=167
+https://wiki.freedesktop.org/www/Specifications/open-collaboration-services/
